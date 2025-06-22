@@ -115,17 +115,24 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
             const chosen = gameBoard.insertChoice(row, column, turn.getSymbol());
     
             if (chosen === false) {
-                break;
+                continue;
             } else {
                 console.log("Move placed.");
                 alternateTurns();
-                continue;
+                break;
             }
         }
     }
 
-    return {playRound}
+    const playGame = () => {
+        ;
+    }
+
+    return {
+        playRound,
+        playGame,
+    }
 })();
 
 
-controller.playRound();
+controller.playGame();
