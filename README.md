@@ -1,2 +1,2 @@
-# rock-paper-scissors
-Rock-Paper-Scissors project/assignment from The Odin Project.
+# tic-tac-toe
+Tie-Tac-Toe project/assignment from The Odin Project.
