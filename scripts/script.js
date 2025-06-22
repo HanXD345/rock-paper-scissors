@@ -1,3 +1,5 @@
+// Sets up the main game board for
+// tic tac toe
 const gameBoard = (function() {
     const rows = 3;
     const columns = 3;
@@ -48,6 +50,9 @@ const gameBoard = (function() {
     };
 })();
 
+// Cell object containing a symbol,
+// as well as a function that can 
+// change the symbol
 function Cell(symbol) {
     const changeValue = (newSymbol) => {
         symbol = newSymbol;
@@ -61,6 +66,8 @@ function Cell(symbol) {
     }
 }
 
+// Player object which contains player name
+// and their symbol
 function Player(name, symbol) {
     const getName = () => name;
     const getSymbol = () => symbol;
@@ -71,20 +78,32 @@ function Player(name, symbol) {
     }
 }
 
+// Sets up the controller for the game
+// Logic: There will be two players. Each 
+// player will alternate turns, choosing 
+// where they want to place their respective 
+// symbol onto the board. A player can win if
+// they can get their symbol to be in a row
+// while not letting the other player to do the 
+// same.
 const controller = (function gameController(player1 = Player('Player One', 'X'), player2 = Player('Player Two', 'O')) {
     let turn = player1;
     const board = gameBoard;
 
+    // Toggles the turn after each round
     const alternateTurns = () => {
         turn = turn === player1 ? player2 : player1;
         return;
     };
 
+    // Displays the game board (formatted) as
+    // well as the current player's turn.
     const printPlayerTurn = (player) => {
         board.printBoard();
         console.log(`${player.getName()}'s Turn`);
     }
 
+    // Plays a single round of tic tac toe (console)
     const playRound = () => {
         while (true) {
             printPlayerTurn(turn);
