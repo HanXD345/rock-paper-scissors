@@ -4,9 +4,10 @@ const gameBoard = (function() {
     let gameBoard = [];
 
     // Sets up the board for the game
-    /* in the form: [[0, 0, 0],
-                     [0, 0, 0],
-                     [0, 0, 0]] */
+    /* in the form: [['*', '*', '*'],
+                     ['*', '*', '*'],
+                     ['*', '*', '*']] */
+    // Each '*' is a Cell Object defined later on
     for (let i = 0; i < rows; i++) {
         let row = [];
         for (let j = 0; j < columns; j++) {
@@ -17,10 +18,12 @@ const gameBoard = (function() {
         gameBoard.push(row);
     }
 
-    console.log(gameBoard);
-
+    // Displays the game board without any modifications
+    // (simply as an array)
     const displayBoard = () => gameBoard;
 
+    // Replaces the placeholder symbol with the player's
+    // symbol given user input (row and column)
     const insertChoice = (row, column, symbol) => {
         if (gameBoard[row][column].getValue() !== '*') {
             console.log("Invalid Move. There is already a symbol there.")
@@ -30,12 +33,12 @@ const gameBoard = (function() {
         return symbol;
     }
 
+    // Console logs the board neatly
     const printBoard = () => {
         for (let i = 0; i < rows; i++) {
-            for (let j = 0; j < rows; j++){
-                console.log(gameBoard[i][j].getValue());
-            }
+            console.log(gameBoard[i][0].getValue() + gameBoard[i][1].getValue() + gameBoard[i][2].getValue())
         }
+        return;
     }
 
     return {
@@ -69,36 +72,35 @@ function Player(name, symbol) {
 }
 
 const controller = (function gameController(player1 = Player('Player One', 'X'), player2 = Player('Player Two', 'O')) {
-    let turn = 0;
+    let turn = player1;
     const board = gameBoard;
 
-    const alternateTurns = (turn) => {
-        return turn === 0 ? 1 : 0;
+    const alternateTurns = () => {
+        turn = turn === player1 ? player2 : player1;
+        return;
     };
 
-    const getPlayerTurn = () => turn;
-
     const printPlayerTurn = (player) => {
-        console.log(board.printBoard());
+        board.printBoard();
         console.log(`${player.getName()}'s Turn`);
     }
 
     const playRound = () => {
-        i = 0;
-        while (i < 2) {
-            printPlayerTurn(player1);
+        while (true) {
+            printPlayerTurn(turn);
 
             console.log("Where would you like to place the symbol? (give coordinates)")
             const row = prompt("Enter row: ");
             const column = prompt("Enter column: ")
     
-            const chosen = gameBoard.insertChoice(row, column, player1.getSymbol());
+            const chosen = gameBoard.insertChoice(row, column, turn.getSymbol());
     
             if (chosen === false) {
-                continue;
+                break;
             } else {
-                console.log("Move placed.")
-                i += 1;
+                console.log("Move placed.");
+                alternateTurns();
+                continue;
             }
         }
     }
