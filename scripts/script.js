@@ -43,6 +43,8 @@ const gameBoard = (function() {
         return;
     }
 
+    // Hashmap/Object representing locations in the
+    // tic tac toe game. (3 rows, 3 columns, 2 diagonals)
     const locations = {
         rows: [0, 0, 0],
         columns: [0, 0, 0],
@@ -51,36 +53,36 @@ const gameBoard = (function() {
 
     let winner = false;
 
+    // Detects the winner of a tic tac toe game.
+    // Logic: we can think of the grid in tic tac toe
+    // as a grid of values, with each player representing
+    // a value (say 1 and -1). A hashmap (or an object in this case)
+    // is set up with row, column, and diagonal arrays. As soon as
+    // the player places their symbol in a specific row and column,
+    // the respective row/column/diagonal array is 
+    // incremented/decremented accordingly. A player wins if 
+    // one of the values in the array is 3 or -3. This is the case 
+    // since we're checking to see if a specific symbol is present 
+    // in a whole row/column/diagonal.
     const detectWinner = (row, column, incrementVal) => {
-        console.log(row, column);
-
         locations.rows[row] += incrementVal;
         locations.columns[column] += incrementVal;
 
         if (row === column) {
-            console.log("Goes through 1");
             locations.diagonals[0] += incrementVal;
         }
         
         if ((row == column && column == 1) || ((row == 0 && column == 2) || (row == 2 && column == 0))) {
-            console.log("Goes through 2");
             locations.diagonals[1] += incrementVal;
         }
-
-
-        console.log(Object.values(locations));
-        Object.values(locations).forEach((value) => {
-            if (value.includes(3) || value.includes(-3)) {
+        
+        Object.values(locations).forEach((array) => {
+            if (array.includes(3) || array.includes(-3)) {
                 winner = true;
             }
         })
 
-        console.log(locations.rows);
-        console.log(locations.columns);
-        console.log(locations.diagonals);
-
         return winner;
-
     }
 
     return {
@@ -158,6 +160,9 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
         }
     }
 
+    // Plays multiple rounds of tic tac toe until
+    // one of the players win, or if there's a tie
+    // (console)
     const playGame = () => {
         let moves = 0;
         let incrementVal = 1
@@ -174,7 +179,7 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
             if (winner !== false) {
                 console.log(`The winner is ${turn.getName()}`)
                 break;
-            } else if (moves >= 9) {
+            } else if (moves === 9) {
                 console.log("Tie!");
                 break;
             } else {
@@ -186,7 +191,6 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     }
 
     return {
-        playRound,
         playGame,
     }
 })();
