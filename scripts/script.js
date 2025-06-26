@@ -75,7 +75,7 @@ const gameBoard = (function() {
         if ((row == column && column == 1) || ((row == 0 && column == 2) || (row == 2 && column == 0))) {
             locations.diagonals[1] += incrementVal;
         }
-        
+
         Object.values(locations).forEach((array) => {
             if (array.includes(3) || array.includes(-3)) {
                 winner = true;
@@ -194,6 +194,3 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
         playGame,
     }
 })();
-
-
-controller.playGame();
