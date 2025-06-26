@@ -27,12 +27,7 @@ const gameBoard = (function() {
     // Replaces the placeholder symbol with the player's
     // symbol given user input (row and column)
     const insertChoice = (row, column, symbol) => {
-        if (gameBoard[row][column].getValue() !== '*') {
-            console.log("Invalid Move. There is already a symbol there.")
-            return false;
-        }
         gameBoard[row][column].changeValue(symbol);
-        return symbol;
     }
 
     // Console logs the board neatly
@@ -131,7 +126,17 @@ function Player(name, symbol) {
 // same.
 const controller = (function gameController(player1 = Player('Player One', 'X'), player2 = Player('Player Two', 'O')) {
     let turn = player1;
+    let moves = 0;
     const board = gameBoard;
+
+    // Gets the current player's turn
+    const getTurn = () => turn;
+    
+    // Gets the current number of moves made
+    const getMoves = () => moves;
+
+    // Increments number of moves
+    const incrementMoves = () => moves++;
 
     // Toggles the turn after each round
     const alternateTurns = () => {
@@ -143,52 +148,54 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     // well as the current player's turn.
     const printPlayerTurn = (player) => {
         board.printBoard();
-        console.log(`${player.getName()}'s Turn`);
+        console.log(`${player.getName()}'s Move ^`);
     }
 
     // Plays a single round of tic tac toe (console)
     const playRound = (row, column) => {
-        while (true) {
-            const chosen = gameBoard.insertChoice(row, column, turn.getSymbol());
-    
-            if (chosen === false) {
-                break;
-            } else {
-                console.log("Move placed.");
-                break;
-            }
-        }
+        gameBoard.insertChoice(row, column, turn.getSymbol()); 
+        console.log("Move placed.")
     }
 
     // Plays multiple rounds of tic tac toe until
     // one of the players win, or if there's a tie
     // (console)
     const playGame = () => {
-        let moves = 0;
         let incrementVal = 1;
         gameDisplay.getGrid();
 
-        while (true) {
-            printPlayerTurn(turn);
+        const ticTacToeSpots = document.querySelectorAll(".spot");
 
-            console.log("Where would you like to place the symbol? (give coordinates)")
-            const row = prompt("Enter row: ");
-            const column = prompt("Enter column: ");
-
-            playRound(row, column);
-            const winner = gameBoard.detectWinner(row, column, incrementVal);
-
-            if (winner !== false) {
-                console.log(`The winner is ${turn.getName()}`)
-                break;
-            } else if (moves === 9) {
-                console.log("Tie!");
-                break;
-            } else {
-                alternateTurns();
-                incrementVal *= -1;
-                moves++;
-            }
+        for (let spot of ticTacToeSpots) {
+            spot.addEventListener("click", (event) => {
+                event.preventDefault();
+                if (spot.textContent === "") {
+                    const turn = getTurn();
+                    const moves = getMoves();
+                    const location = gameDisplay.changeSpot(spot, turn);
+                    const row = location[0];
+                    const column = location[1];
+    
+                    const round = playRound(row, column);
+    
+                    if (round !== false) {
+                        const winner = gameBoard.detectWinner(row, column, incrementVal);
+    
+                        if (winner !== false) {
+                            console.log(`The winner is ${turn.getName()}`);
+                        } else if (moves === 8) {
+                            console.log("Tie!");
+                        } else {
+                            printPlayerTurn(turn);
+                            alternateTurns();
+                            incrementVal *= -1;
+                            incrementMoves();
+                        }
+                    }   
+                } else {
+                    console.log("Invalid Move. There's already a symbol there.")
+                }
+            })
         }
     }
 
@@ -205,12 +212,14 @@ const gameDisplay = (function gameDisplay() {
             for (let j = 0; j < 3; j++) {
                 const ticTacToeSpot = document.createElement("div");
                 ticTacToeSpot.setAttribute("class", `row-${i} column-${j} spot`);
+                ticTacToeSpot.textContent = "";
                 container.appendChild(ticTacToeSpot);
             }
         }
     }
 
-    const getRowAndColumn = (spot) => {
+    const changeSpot = (spot, player) => {
+        spot.textContent = player.getSymbol();
         const spotAttributes = spot.classList.value.split(" ");
         let location = [];
         for (let i = 0; i < spotAttributes.length; i++) {
@@ -224,21 +233,10 @@ const gameDisplay = (function gameDisplay() {
         return location;
     }
 
-    const getChoice = (player) => {
-        const ticTacToeSpots = document.querySelectorAll(".spot");
-
-        for (let spot of ticTacToeSpots) {
-            spot.addEventListener("click", () => {
-                if (spot.textContent !== "") {
-                    spot.textContent = player.getSymbol();
-                    const location = getRowAndColumn(spot);
-                }
-            })
-        }
-    }
-
     return {
         getGrid,
-        getRowAndColumn,
+        changeSpot,
     }
 })();
+
+controller.playGame();
