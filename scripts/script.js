@@ -165,7 +165,9 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     // (console)
     const playGame = () => {
         let moves = 0;
-        let incrementVal = 1
+        let incrementVal = 1;
+        gameDisplay.getGrid();
+
         while (true) {
             printPlayerTurn(turn);
 
@@ -192,5 +194,51 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
 
     return {
         playGame,
+    }
+})();
+
+const gameDisplay = (function gameDisplay() {
+    const container = document.querySelector(".container");
+
+    const getGrid = () => {
+        for (let i = 0; i < 3; i++) {
+            for (let j = 0; j < 3; j++) {
+                const ticTacToeSpot = document.createElement("div");
+                ticTacToeSpot.setAttribute("class", `row-${i} column-${j} spot`);
+                container.appendChild(ticTacToeSpot);
+            }
+        }
+    }
+
+    const getRowAndColumn = (spot) => {
+        const spotAttributes = spot.classList.value.split(" ");
+        let location = [];
+        for (let i = 0; i < spotAttributes.length; i++) {
+            if (spotAttributes[i].slice(0, 3) === "row") {
+                location.push(spotAttributes[i].at(-1));
+            } else if (spotAttributes[i].slice(0, 3) === "col") {
+                location.push(spotAttributes[i].at(-1));
+            }
+        }
+
+        return location;
+    }
+
+    const getChoice = (player) => {
+        const ticTacToeSpots = document.querySelectorAll(".spot");
+
+        for (let spot of ticTacToeSpots) {
+            spot.addEventListener("click", () => {
+                if (spot.textContent !== "") {
+                    spot.textContent = player.getSymbol();
+                    const location = getRowAndColumn(spot);
+                }
+            })
+        }
+    }
+
+    return {
+        getGrid,
+        getRowAndColumn,
     }
 })();
