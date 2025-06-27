@@ -109,10 +109,14 @@ function Cell(symbol) {
 function Player(name, symbol) {
     const getName = () => name;
     const getSymbol = () => symbol;
+    const changeName = (newName) => {
+        name = newName;
+    }
 
     return {
         getName,
         getSymbol,
+        changeName,
     }
 }
 
@@ -137,6 +141,22 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
 
     // Increments number of moves
     const incrementMoves = () => moves++;
+
+    // Sets the player names
+    const getNames = () => {
+        const playerOneName = prompt("What is player one's name? ");
+        const playerTwoName = prompt("What is player two's name? ");
+
+        player1.changeName(playerOneName);
+        player2.changeName(playerTwoName);
+
+        const names = document.createElement("div");
+        names.textContent = `Player One Name: ${player1.getName()}, Player Two Name: ${player2.getName()}`;
+
+        const main = document.querySelector("main");
+
+        main.appendChild(names);
+    }
 
     // Toggles the turn after each round
     const alternateTurns = () => {
@@ -163,6 +183,7 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     const playGame = () => {
         let incrementVal = 1;
         gameDisplay.getGrid();
+        getNames();
 
         const ticTacToeSpots = document.querySelectorAll(".spot");
 
