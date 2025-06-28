@@ -13,8 +13,37 @@
 		Tic Tac Toe Game
 	</header>
 	<main>
+		<dialog>
+			<form action="" method="post">
+				<div>
+					<h1>Welcome to my Tic Tac Toe Game!</h1>
+					<h2>Please enter names below</h2>
+				</div>
+
+				<div>
+					<label for="playerOneName">Player One Name: </label>
+					<input type="text" id="playerOneName" name="playerOneName" placeholder="Player One">
+				</div>
+
+				<div>
+					<label for="playerTwoName">Player Two Name: </label>
+					<input type="text" id="playerTwoName" name="playerTwoName" placeholder="Player Two">
+				</div>
+
+				<div class="button">
+					<input type="submit">
+				</div>
+		</form>
+		</dialog>
 		<div class="container">
 		</div>
+		<div class="player-names">
+		</div>
+		<div class="turn-message">
+		</div>
+		<div class="end-game-message">
+		</div>
+		<button class="reset-button">Reset</button>
 	</main>
 </body>
 </html>

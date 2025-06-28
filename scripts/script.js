@@ -10,15 +10,21 @@ const gameBoard = (function() {
                      ['*', '*', '*'],
                      ['*', '*', '*']] */
     // Each '*' is a Cell Object defined later on
-    for (let i = 0; i < rows; i++) {
-        let row = [];
-        for (let j = 0; j < columns; j++) {
-            const cell = Cell()
-            cell.changeValue("*")
-            row.push(cell)
+    const createBoard = () => {
+        clearBoard();
+        console.log(gameBoard);
+        for (let i = 0; i < rows; i++) {
+            let row = [];
+            for (let j = 0; j < columns; j++) {
+                const cell = Cell()
+                cell.changeValue("*")
+                row.push(cell)
+            }
+            gameBoard.push(row);
         }
-        gameBoard.push(row);
     }
+
+    const clearBoard = () => gameBoard.splice(0, gameBoard.length);
 
     // Displays the game board without any modifications
     // (simply as an array)
@@ -30,23 +36,27 @@ const gameBoard = (function() {
         gameBoard[row][column].changeValue(symbol);
     }
 
-    // Console logs the board neatly
-    const printBoard = () => {
-        for (let i = 0; i < rows; i++) {
-            console.log(gameBoard[i][0].getValue() + gameBoard[i][1].getValue() + gameBoard[i][2].getValue())
-        }
-        return;
-    }
-
     // Hashmap/Object representing locations in the
     // tic tac toe game. (3 rows, 3 columns, 2 diagonals)
-    const locations = {
+    let locations = {
         rows: [0, 0, 0],
         columns: [0, 0, 0],
         diagonals: [0, 0],
     }
 
+    const resetLocations = () => {
+        locations = {
+            rows: [0, 0, 0],
+            columns: [0, 0, 0],
+            diagonals: [0, 0],
+        }
+    }
+
     let winner = false;
+
+    const resetWinner = () => {
+        winner = false;
+    }
 
     // Detects the winner of a tic tac toe game.
     // Logic: we can think of the grid in tic tac toe
@@ -82,9 +92,11 @@ const gameBoard = (function() {
 
     return {
         getBoard,
+        createBoard,
         insertChoice,
-        printBoard,
+        resetLocations,
         detectWinner,
+        resetWinner,
     };
 })();
 
@@ -132,6 +144,7 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     let turn = player1;
     let moves = 0;
     const board = gameBoard;
+    board.createBoard();
 
     // Gets the current player's turn
     const getTurn = () => turn;
@@ -142,20 +155,36 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     // Increments number of moves
     const incrementMoves = () => moves++;
 
-    // Sets the player names
-    const getNames = () => {
-        const playerOneName = prompt("What is player one's name? ");
-        const playerTwoName = prompt("What is player two's name? ");
+    // Creates a modal for when the user opens the website
+    // for the first time in order to input names
+    const getModal = () => {
+        const modal = document.querySelector("dialog");
+        modal.showModal();
+        
+        const submitButton = document.querySelector("[type='submit']");
 
-        player1.changeName(playerOneName);
-        player2.changeName(playerTwoName);
+        submitButton.addEventListener("click", (event) => {
+            event.preventDefault();
 
-        const names = document.createElement("div");
-        names.textContent = `Player One Name: ${player1.getName()}, Player Two Name: ${player2.getName()}`;
+            const form = document.querySelector("form");
+            const formData = new FormData(form);
 
-        const main = document.querySelector("main");
+            const playerOneName = formData.get('playerOneName');
+            const playerTwoName = formData.get('playerTwoName');
 
-        main.appendChild(names);
+            player1.changeName(playerOneName);
+            player2.changeName(playerTwoName);
+
+            modal.close();
+            form.reset();
+
+            const names = document.querySelector(".player-names");
+            names.textContent = "";
+            names.textContent = `Player One Name: ${player1.getName()} (${player1.getSymbol()}), 
+                                    Player Two Name: ${player2.getName()} (${player2.getSymbol()})`;
+
+            printPlayerTurn(turn);
+        })
     }
 
     // Toggles the turn after each round
@@ -167,57 +196,72 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     // Displays the game board (formatted) as
     // well as the current player's turn.
     const printPlayerTurn = (player) => {
-        board.printBoard();
-        console.log(`${player.getName()}'s Move ^`);
+        const turnMessage = document.querySelector(".turn-message");
+        turnMessage.textContent = `${player.getName()}'s Turn`;
+    }
+
+    const printEndGameMessage = (player) => {
+        const endGameMessage = document.querySelector(".end-game-message");
+        endGameMessage.textContent = player === null ? "Tie!" : `${player.getName()} (${player.getSymbol()}) is the winner!`;
     }
 
     // Plays a single round of tic tac toe (console)
     const playRound = (row, column) => {
         gameBoard.insertChoice(row, column, turn.getSymbol()); 
-        console.log("Move placed.")
     }
 
     // Plays multiple rounds of tic tac toe until
     // one of the players win, or if there's a tie
-    // (console)
     const playGame = () => {
         let incrementVal = 1;
         gameDisplay.getGrid();
-        getNames();
+        getModal();
+        board.resetLocations();
+        board.createBoard();
+        moves = 0;
+        let gameEnded = false;
 
         const ticTacToeSpots = document.querySelectorAll(".spot");
 
         for (let spot of ticTacToeSpots) {
             spot.addEventListener("click", (event) => {
-                event.preventDefault();
-                if (spot.textContent === "") {
-                    const turn = getTurn();
-                    const moves = getMoves();
-                    const location = gameDisplay.changeSpot(spot, turn);
-                    const row = location[0];
-                    const column = location[1];
-    
-                    const round = playRound(row, column);
-    
-                    if (round !== false) {
+                if (!gameEnded) {
+                    event.preventDefault();
+                    if (spot.textContent === "") {
+                        const location = gameDisplay.changeSpot(spot, turn);
+                        const row = location[0];
+                        const column = location[1];
+        
+                        playRound(row, column);
+        
                         const winner = gameBoard.detectWinner(row, column, incrementVal);
     
                         if (winner !== false) {
-                            console.log(`The winner is ${turn.getName()}`);
-                        } else if (moves === 8) {
-                            console.log("Tie!");
+                            printEndGameMessage(getTurn());
+                            gameEnded = true;
+                        } else if (getMoves() === 8) {
+                            printEndGameMessage(null);
+                            gameEnded = true;
                         } else {
-                            printPlayerTurn(turn);
                             alternateTurns();
+                            printPlayerTurn(getTurn());
                             incrementVal *= -1;
                             incrementMoves();
                         }
-                    }   
-                } else {
-                    console.log("Invalid Move. There's already a symbol there.")
+                    } else {
+                        console.log("Invalid Move. There's already a symbol there.")
+                    }
                 }
             })
         }
+
+        const resetButton = document.querySelector(".reset-button");
+
+        resetButton.addEventListener("click", () => {
+            gameEnded = false;
+            board.resetWinner();
+            playGame();
+        })
     }
 
     return {
@@ -229,6 +273,7 @@ const gameDisplay = (function gameDisplay() {
     const container = document.querySelector(".container");
 
     const getGrid = () => {
+        container.textContent = "";
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 const ticTacToeSpot = document.createElement("div");
