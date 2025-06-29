@@ -200,9 +200,9 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
         turnMessage.textContent = `${player.getName()}'s Turn`;
     }
 
-    const printEndGameMessage = (player) => {
+    const printEndGameMessage = (winner) => {
         const endGameMessage = document.querySelector(".end-game-message");
-        endGameMessage.textContent = player === null ? "Tie!" : `${player.getName()} (${player.getSymbol()}) is the winner!`;
+        endGameMessage.textContent = winner === null ? "Tie!" : `${winner.getName()} (${winner.getSymbol()}) is the winner!`;
     }
 
     // Plays a single round of tic tac toe (console)
@@ -210,19 +210,37 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
         gameBoard.insertChoice(row, column, turn.getSymbol()); 
     }
 
+    let gameRestarted = false;
+
+    const resetGame = () => {
+        gameDisplay.getGrid();
+        board.resetLocations();
+        board.createBoard();
+    }
+
     // Plays multiple rounds of tic tac toe until
     // one of the players win, or if there's a tie
     const playGame = () => {
+        // incrementVal used for game logic - see gameBoard
+        // 'detectWinner'
         let incrementVal = 1;
-        gameDisplay.getGrid();
-        getModal();
-        board.resetLocations();
-        board.createBoard();
+        resetGame();
         moves = 0;
         let gameEnded = false;
 
+        // If the game hasn't been restarted, obtain player names
+        if (gameRestarted === false) {
+            getModal();
+        }
+
         const ticTacToeSpots = document.querySelectorAll(".spot");
 
+        // For each spot on the tic tac toe board,
+        // add event listener for when player clicks
+        // on a spot on the board. When a player clicks
+        // on a spot, change the contents of the spot
+        // to the player's symbol, and play a round
+        // to see if there's a winner.
         for (let spot of ticTacToeSpots) {
             spot.addEventListener("click", (event) => {
                 if (!gameEnded) {
@@ -236,12 +254,18 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
         
                         const winner = gameBoard.detectWinner(row, column, incrementVal);
     
+                        // If winner is decided, pass the currrent
+                        // player as the winner.
                         if (winner !== false) {
                             printEndGameMessage(getTurn());
                             gameEnded = true;
+                        // If moves is equal to 8 (0 inclusive, 
+                        // no more spots on the board), there is 
+                        // no winnner
                         } else if (getMoves() === 8) {
                             printEndGameMessage(null);
                             gameEnded = true;
+                        // else continue the game
                         } else {
                             alternateTurns();
                             printPlayerTurn(getTurn());
@@ -257,9 +281,13 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
 
         const resetButton = document.querySelector(".reset-button");
 
+        // Resets the game if the player presses the
+        // reset button
         resetButton.addEventListener("click", () => {
             gameEnded = false;
             board.resetWinner();
+            gameRestarted = true;
+            document.querySelector(".end-game-message").textContent = "";
             playGame();
         })
     }
@@ -269,24 +297,34 @@ const controller = (function gameController(player1 = Player('Player One', 'X'),
     }
 })();
 
+// Sets up the display for the game
+// on the html page. 
 const gameDisplay = (function gameDisplay() {
     const container = document.querySelector(".container");
 
+    // Creates a tic tac toe grid onto the page
+    // with row and column classes to identify
+    // each of the squares' position on the 
+    // board
     const getGrid = () => {
         container.textContent = "";
         for (let i = 0; i < 3; i++) {
             for (let j = 0; j < 3; j++) {
                 const ticTacToeSpot = document.createElement("div");
                 ticTacToeSpot.setAttribute("class", `row-${i} column-${j} spot`);
-                ticTacToeSpot.textContent = "";
+                ticTacToeSpot.textContent = ""; // for resetting purposes
                 container.appendChild(ticTacToeSpot);
             }
         }
     }
 
+    // Changes the content of the chosen spot
+    // to be the player's symbol. The function
+    // also returns the positon of the pressed
+    // spot as a list
     const changeSpot = (spot, player) => {
         spot.textContent = player.getSymbol();
-        const spotAttributes = spot.classList.value.split(" ");
+        const spotAttributes = spot.classList.value.split(" "); // Obtain the classes of the chosen spot
         let location = [];
         for (let i = 0; i < spotAttributes.length; i++) {
             if (spotAttributes[i].slice(0, 3) === "row") {
@@ -305,4 +343,5 @@ const gameDisplay = (function gameDisplay() {
     }
 })();
 
+// Plays the game
 controller.playGame();
